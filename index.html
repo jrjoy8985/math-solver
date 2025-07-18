@@ -1,63 +1,32 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
   <title>JoyMath Solver</title>
-</head>
-<body>
-  <h2>ছবি থেকে ম্যাথ সমাধান করুন (বাংলা ও ইংরেজি)</h2>
-  <input type="file" id="imageInput" accept="image/*" />
-  <button onclick="processImage()">Solve</button>
-  <p id="output"></p>
-
-  <!-- লাইব্রেরি -->
-  <script src="https://cdn.jsdelivr.net/npm/mathjs@11.3.1/lib/browser/math.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.0.2/dist/tesseract.min.js"></script>
-
-  <script>
-    function processImage() {
-      const imageInput = document.getElementById("imageInput");
-      const output = document.getElementById("output");
-
-      if (imageInput.files.length === 0) {
-        output.innerText = "দয়া করে একটি ছবি আপলোড করুন।";
-        return;
-      }
-
-      const file = imageInput.files[0];
-
-      Tesseract.recognize(file, 'eng+ben', {
-        logger: m => console.log(m)
-      }).then(({ data: { text } }) => {
-        output.innerText = "চিহ্নিত লেখা:\n" + text;
-
-        const converted = text
-          .replace(/এক/g, '1')
-          .replace(/দুই/g, '2')
-          .replace(/তিন/g, '3')
-          .replace(/চার/g, '4')
-          .replace(/পাঁচ/g, '5')
-          .replace(/ছয়/g, '6')
-          .replace(/সাত/g, '7')
-          .replace(/আট/g, '8')
-          .replace(/নয়/g, '9')
-          .replace(/শূন্য/g, '0')
-          .replace(/যোগ/g, '+')
-          .replace(/বিয়োগ/g, '-')
-          .replace(/গুণ/g, '*')
-          .replace(/ভাগ/g, '/');
-
-        try {
-          const result = math.evaluate(converted);
-          output.innerText += `\n\nসমাধান: ${result}`;
-        } catch (e) {
-          output.innerText += `\n\nসমাধান করা যায়নি: ${e.message}`;
-        }
-      }).catch(err => {
-        output.innerText = "OCR তে সমস্যা হয়েছে: " + err.message;
-      });
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2.1.1/dist/tesseract.min.js"></script>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: #f0f9ff;
+      text-align: center;
+      padding: 20px;
     }
-  </script>
-</body>
-</html>
+    h1 {
+      color: #0077cc;
+    }
+    input[type="file"] {
+      margin: 20px;
+    }
+    .output {
+      white-space: pre-wrap;
+      background: #fff;
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      margin: 15px auto;
+      width: 90%;
+      max-width: 600px;
+    }
+    .pill {
+      background-color: #d0f0ff;
+      color: #0

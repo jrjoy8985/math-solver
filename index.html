@@ -7,6 +7,36 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <h2>ম্যাথ ছবি আপলোড করুন</h2>
+<input type="file" id="imageInput" accept="image/*" />
+<button onclick="processImage()">সমাধান করুন</button>
+<p id="output"></p>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.0.2/dist/tesseract.min.js"></script>
+<script>
+  function processImage() {
+    const imageInput = document.getElementById("imageInput");
+    const output = document.getElementById("output");
+
+    if (imageInput.files.length === 0) {
+      output.innerText = "দয়া করে একটি ছবি আপলোড করুন।";
+      return;
+    }
+
+    const file = imageInput.files[0];
+    Tesseract.recognize(
+      file,
+      'eng',
+      {
+        logger: m => console.log(m)
+      }
+    ).then(({ data: { text } }) => {
+      output.innerText = "চিহ্নিত লেখা: " + text;
+
+      // Optional: আপনি চাইলে এখানে math.js দিয়ে হিসাব করতে পারেন
+    });
+  }
+</script>
+
   <div class="container">
     <h1>🔍 Math Solver</h1>
     <textarea id="input" placeholder="প্রশ্ন লিখুন (বাংলা বা English)..."></textarea>

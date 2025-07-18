@@ -1,51 +1,63 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
-  <meta charset="UTF-8">
-  <title>Math Solver (বাংলা ও English)</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>JoyMath Solver</title>
 </head>
 <body>
-  <h2>ম্যাথ ছবি আপলোড করুন</h2>
-<input type="file" id="imageInput" accept="image/*" />
-<button onclick="processImage()">সমাধান করুন</button>
-<p id="output"></p>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.0.2/dist/tesseract.min.js"></script>
-<script>
-  function processImage() {
-    const imageInput = document.getElementById("imageInput");
-    const output = document.getElementById("output");
+  <h2>ছবি থেকে ম্যাথ সমাধান করুন (বাংলা ও ইংরেজি)</h2>
+  <input type="file" id="imageInput" accept="image/*" />
+  <button onclick="processImage()">Solve</button>
+  <p id="output"></p>
 
-    if (imageInput.files.length === 0) {
-      output.innerText = "দয়া করে একটি ছবি আপলোড করুন।";
-      return;
-    }
+  <!-- লাইব্রেরি -->
+  <script src="https://cdn.jsdelivr.net/npm/mathjs@11.3.1/lib/browser/math.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.0.2/dist/tesseract.min.js"></script>
 
-    const file = imageInput.files[0];
-    Tesseract.recognize(
-      file,
-      'eng',
-      {
-        logger: m => console.log(m)
+  <script>
+    function processImage() {
+      const imageInput = document.getElementById("imageInput");
+      const output = document.getElementById("output");
+
+      if (imageInput.files.length === 0) {
+        output.innerText = "দয়া করে একটি ছবি আপলোড করুন।";
+        return;
       }
-    ).then(({ data: { text } }) => {
-      output.innerText = "চিহ্নিত লেখা: " + text;
 
-      // Optional: আপনি চাইলে এখানে math.js দিয়ে হিসাব করতে পারেন
-    });
-  }
-</script>
+      const file = imageInput.files[0];
 
-  <div class="container">
-    <h1>🔍 Math Solver</h1>
-    <textarea id="input" placeholder="প্রশ্ন লিখুন (বাংলা বা English)..."></textarea>
-    <button onclick="solveMath()">Solve</button>
-    <div id="output"></div>
-  </div>
-  <script src="script.js"></script>
+      Tesseract.recognize(file, 'eng+ben', {
+        logger: m => console.log(m)
+      }).then(({ data: { text } }) => {
+        output.innerText = "চিহ্নিত লেখা:\n" + text;
+
+        const converted = text
+          .replace(/এক/g, '1')
+          .replace(/দুই/g, '2')
+          .replace(/তিন/g, '3')
+          .replace(/চার/g, '4')
+          .replace(/পাঁচ/g, '5')
+          .replace(/ছয়/g, '6')
+          .replace(/সাত/g, '7')
+          .replace(/আট/g, '8')
+          .replace(/নয়/g, '9')
+          .replace(/শূন্য/g, '0')
+          .replace(/যোগ/g, '+')
+          .replace(/বিয়োগ/g, '-')
+          .replace(/গুণ/g, '*')
+          .replace(/ভাগ/g, '/');
+
+        try {
+          const result = math.evaluate(converted);
+          output.innerText += `\n\nসমাধান: ${result}`;
+        } catch (e) {
+          output.innerText += `\n\nসমাধান করা যায়নি: ${e.message}`;
+        }
+      }).catch(err => {
+        output.innerText = "OCR তে সমস্যা হয়েছে: " + err.message;
+      });
+    }
+  </script>
 </body>
 </html>
-<input type="file" id="imageInput" accept="image/*" />
-<button onclick="processImage()">Solve from Image</button>
-<p id="extractedText"></p>

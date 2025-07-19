@@ -7,25 +7,33 @@
   <style>
     body {
       font-family: "Segoe UI", sans-serif;
-      background: #f0f9ff;
-      text-align: center;
+      background: #eef9ff;
       padding: 20px;
+      text-align: center;
     }
     h1 {
-      color: #0077cc;
+      color: #007acc;
     }
-    input[type="file"] {
-      margin: 20px;
+    input[type="file"], textarea, button {
+      margin: 10px;
+      padding: 10px;
+      font-size: 16px;
     }
-    .output {
-      white-space: pre-wrap;
-      background: #fff;
-      padding: 15px;
-      border-radius: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      margin: 15px auto;
+    textarea {
       width: 90%;
       max-width: 600px;
+      height: 80px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+    }
+    .output {
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      margin: 15px auto;
+      max-width: 600px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      white-space: pre-wrap;
     }
     .pill {
       background-color: #d0f0ff;
@@ -40,10 +48,16 @@
   </style>
 </head>
 <body>
-  <h1>📸 JoyMath Solver</h1>
-  <p>ছবি আপলোড করুন — আমরা বাংলা ও ইংরেজি ম্যাথ সমাধান করবো!</p>
+  <h1>📸✍️ JoyMath Solver</h1>
+  <p>ছবি আপলোড করুন অথবা নিজে লিখুন (বাংলা/English)</p>
+
   <input type="file" id="imageInput" accept="image/*"><br>
-  <div class="output" id="output">এখানে ফলাফল আসবে...</div>
+
+  <textarea id="manualInput" placeholder="এখানে ম্যাথ লিখুন যেমনঃ গতি = দূরত্ব / সময় বা F = ma"></textarea><br>
+
+  <button onclick="processManualInput()">✍️ Solve Typed Math</button>
+
+  <div class="output" id="output">📋 ফলাফল এখানে আসবে...</div>
   <div id="suggestions"></div>
 
   <script>
@@ -61,40 +75,55 @@
       'area': ['Area = πr²', 'Area = length × width']
     };
 
+    function suggestFormulas(text) {
+      suggestionsDiv.innerHTML = '';
+      for (let key in formulas) {
+        if (text.toLowerCase().includes(key)) {
+          formulas[key].forEach(f => {
+            const span = document.createElement("span");
+            span.className = "pill";
+            span.innerText = f;
+            suggestionsDiv.appendChild(span);
+          });
+        }
+      }
+    }
+
+    function trySolveMath(text) {
+      try {
+        const mathText = text.replace(/[^\d\+\-\*\/\.\(\)]/g, '');
+        if (mathText) {
+          const result = eval(mathText);
+          return `${mathText} = ${result}`;
+        }
+      } catch (e) {
+        return "⚠️ সমাধান করা যায়নি।";
+      }
+      return '';
+    }
+
     imageInput.addEventListener("change", () => {
       const file = imageInput.files[0];
-      output.innerText = "⏳ প্রসেস করা হচ্ছে...";
+      output.innerText = "⏳ ছবি প্রসেস করা হচ্ছে...";
       suggestionsDiv.innerHTML = "";
 
       Tesseract.recognize(file, 'eng+ben', {
         logger: m => console.log(m)
       }).then(({ data: { text } }) => {
         output.innerText = "📄 চিহ্নিত লেখা:\n" + text;
-
-        // Formula Suggestion
-        for (let key in formulas) {
-          if (text.toLowerCase().includes(key)) {
-            formulas[key].forEach(f => {
-              const span = document.createElement("span");
-              span.className = "pill";
-              span.innerText = f;
-              suggestionsDiv.appendChild(span);
-            });
-          }
-        }
-
-        // Simple Math Solve
-        try {
-          const mathText = text.replace(/[^\d\+\-\*\/\.\(\)]/g, '');
-          if (mathText) {
-            const result = eval(mathText);
-            output.innerText += `\n\n📘 সমাধান:\n${mathText} = ${result}`;
-          }
-        } catch (e) {
-          output.innerText += "\n⚠️ সমাধান করা যায়নি।";
-        }
+        suggestFormulas(text);
+        const result = trySolveMath(text);
+        if (result) output.innerText += `\n\n📘 সমাধান:\n${result}`;
       });
     });
+
+    function processManualInput() {
+      const text = document.getElementById("manualInput").value;
+      output.innerText = "📄 ইনপুট লেখা:\n" + text;
+      suggestFormulas(text);
+      const result = trySolveMath(text);
+      if (result) output.innerText += `\n\n📘 সমাধান:\n${result}`;
+    }
   </script>
 </body>
 </html>

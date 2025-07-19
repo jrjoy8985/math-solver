@@ -29,4 +29,72 @@
     }
     .pill {
       background-color: #d0f0ff;
-      color: #0
+      color: #0077aa;
+      padding: 6px 14px;
+      border-radius: 999px;
+      margin: 6px;
+      display: inline-block;
+      font-size: 14px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+  <h1>📸 JoyMath Solver</h1>
+  <p>ছবি আপলোড করুন — আমরা বাংলা ও ইংরেজি ম্যাথ সমাধান করবো!</p>
+  <input type="file" id="imageInput" accept="image/*"><br>
+  <div class="output" id="output">এখানে ফলাফল আসবে...</div>
+  <div id="suggestions"></div>
+
+  <script>
+    const imageInput = document.getElementById("imageInput");
+    const output = document.getElementById("output");
+    const suggestionsDiv = document.getElementById("suggestions");
+
+    const formulas = {
+      'গতি': ['গতি = দূরত্ব / সময়', 'গতি = ω × r'],
+      'বল': ['বল = ভর × ত্বরণ', 'F = ma'],
+      'ত্রিভুজ': ['ত্রিভুজের ক্ষেত্রফল = ½ × base × height'],
+      'ভর': ['ভর = ওজন / মাধ্যাকর্ষণ'],
+      'force': ['F = ma', 'F = G * (m1*m2)/r²'],
+      'speed': ['Speed = Distance / Time'],
+      'area': ['Area = πr²', 'Area = length × width']
+    };
+
+    imageInput.addEventListener("change", () => {
+      const file = imageInput.files[0];
+      output.innerText = "⏳ প্রসেস করা হচ্ছে...";
+      suggestionsDiv.innerHTML = "";
+
+      Tesseract.recognize(file, 'eng+ben', {
+        logger: m => console.log(m)
+      }).then(({ data: { text } }) => {
+        output.innerText = "📄 চিহ্নিত লেখা:\n" + text;
+
+        // Formula Suggestion
+        for (let key in formulas) {
+          if (text.toLowerCase().includes(key)) {
+            formulas[key].forEach(f => {
+              const span = document.createElement("span");
+              span.className = "pill";
+              span.innerText = f;
+              suggestionsDiv.appendChild(span);
+            });
+          }
+        }
+
+        // Simple Math Solve
+        try {
+          const mathText = text.replace(/[^\d\+\-\*\/\.\(\)]/g, '');
+          if (mathText) {
+            const result = eval(mathText);
+            output.innerText += `\n\n📘 সমাধান:\n${mathText} = ${result}`;
+          }
+        } catch (e) {
+          output.innerText += "\n⚠️ সমাধান করা যায়নি।";
+        }
+      });
+    });
+  </script>
+</body>
+</html>
